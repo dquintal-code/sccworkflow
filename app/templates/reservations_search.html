@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% macro sort_link(label, field) -%}
+  <a href="{{ reservation_sort_url(q, facility_id, reservation_date, include_canceled, field, sort, direction) }}">{{ label }}</a>
+{%- endmacro %}
+
+{% block content %}
+{% if request.query_params.get("deleted") %}
+  <div class="notice">Reservation {{ request.query_params.get("deleted") }} was deleted.</div>
+{% endif %}
+
+<p class="site-note">Use this page to find reservations by reservation ID, reservee name, household number, phone, or email.</p>
+
+<div class="search-layout">
+  <form class="filter-sidebar" method="get" action="/reservations">
+    <div class="filter-card open">
+      <h2>Search</h2>
+      <label>
+        Keyword
+        <input type="search" name="q" value="{{ q }}" placeholder="Name, ID, household, phone, email">
+      </label>
+    </div>
+
+    <div class="filter-card open">
+      <h2>Facility</h2>
+      <label>
+        Facility
+        <select name="facility_id">
+          <option value="">All facilities</option>
+          {% for facility in facilities %}
+            <option value="{{ facility.facility_id }}" {% if facility.facility_id == facility_id %}selected{% endif %}>{{ facility.facility_name }}</option>
+          {% endfor %}
+        </select>
+      </label>
+    </div>
+
+    <div class="filter-card open">
+      <h2>Reservation Date</h2>
+      <label>
+        Date
+        <input type="date" name="reservation_date" value="{{ reservation_date }}">
+      </label>
+    </div>
+
+    <div class="filter-card open">
+      <h2>Status</h2>
+      <label class="checkbox">
+        <input type="checkbox" name="include_canceled" value="true" {% if include_canceled %}checked{% endif %}>
+        Include canceled
+      </label>
+    </div>
+
+    <input type="hidden" name="sort" value="{{ sort }}">
+    <input type="hidden" name="direction" value="{{ direction }}">
+    <button type="submit" class="search-button">Search</button>
+    <a class="reset-button create-reservation-button" href="/reservations/new">New reservation</a>
+    <a class="reset-button" href="/reservations">Reset</a>
+  </form>
+
+  <section class="search-main">
+    <h1>Reservation Search</h1>
+    <div class="panel result-panel">
+      <div class="section-heading result-heading">
+        <h2>Search Results</h2>
+        <span>Showing {{ results|length }} reservation{{ "" if results|length == 1 else "s" }}</span>
+      </div>
+      <div class="display-option">Display option: <strong>Detail</strong></div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>{{ sort_link("Reservation ID", "reservation_id") }}</th>
+              <th>{{ sort_link("Facility", "facility") }}</th>
+              <th>{{ sort_link("Reservee name", "reservee_name") }}</th>
+              <th>{{ sort_link("Event date", "event_date") }}</th>
+              <th>Event end date</th>
+              <th>Phone</th>
+              <th>Email</th>
+              <th>{{ sort_link("Canceled", "cancelled") }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for reservation in results %}
+              <tr>
+                <td><a href="/reservations/{{ reservation.reservation_id }}">{{ reservation.reservation_id }}</a></td>
+                <td>{{ reservation.facility.facility_name }}</td>
+                <td>{{ reservation.reservee_name }}</td>
+                <td>{{ reservation.event_date }}</td>
+                <td>{{ reservation.event_end_date or "" }}</td>
+                <td>{{ reservation.phone or "" }}</td>
+                <td>{{ reservation.email or "" }}</td>
+                <td>{{ "Yes" if reservation.cancelled else "No" }}</td>
+              </tr>
+            {% else %}
+              <tr><td colspan="8" class="empty">No reservations match these filters.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}

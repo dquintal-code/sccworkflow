@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="page-header">
+  <div>
+    <h1>Import Preview</h1>
+    <p>{{ preview.filename }}</p>
+  </div>
+  <a class="button-secondary" href="/import">Back to import</a>
+</section>
+
+{% if preview.applied %}
+  <div class="notice">This preview has already been applied.</div>
+{% endif %}
+
+<section class="metric-grid">
+  <div class="metric">
+    <span class="metric-number">{{ preview.added_count }}</span>
+    <span class="metric-label">New reservations</span>
+  </div>
+  <div class="metric">
+    <span class="metric-number warning">{{ preview.changed_count }}</span>
+    <span class="metric-label">Changed reservations</span>
+  </div>
+  <div class="metric">
+    <span class="metric-number danger">{{ preview.canceled_count }}</span>
+    <span class="metric-label">Canceled reservations</span>
+  </div>
+</section>
+
+<section class="panel">
+  <h2>Fields Included In This Import</h2>
+  <p class="sync-note">Existing reservations will only be updated for these fields. Missing CSV columns are ignored.</p>
+  <div class="field-chip-list">
+    {% for field in preview.preview.included_fields %}
+      <span class="field-chip {% if not field.can_update_existing %}muted-chip{% endif %}">
+        {{ field.label }}{% if not field.can_update_existing %} matching key{% endif %}
+      </span>
+    {% else %}
+      <span class="field-chip muted-chip">No recognized fields</span>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="panel">
+  <h2>New Reservations</h2>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Reservation ID</th>
+          <th>Facility</th>
+          <th>Reservee name</th>
+          <th>Event date</th>
+          <th>Event end date</th>
+          <th>Email</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in preview.preview.new_records %}
+          <tr>
+            <td>{{ row.reservation_id }}</td>
+            <td>{{ row.facility_id }}</td>
+            <td>{{ row.reservee_name }}</td>
+            <td>{{ row.event_date }}</td>
+            <td>{{ row.event_end_date or "" }}</td>
+            <td>{{ row.email or "" }}</td>
+          </tr>
+        {% else %}
+          <tr><td colspan="6" class="empty">No new reservations.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="panel">
+  <h2>Changed Reservations</h2>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Reservation ID</th>
+          <th>Reservee name</th>
+          <th>Facility</th>
+          <th>Before / After</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in preview.preview.changed_records %}
+          <tr>
+            <td>{{ row.reservation_id }}</td>
+            <td>{{ row.reservee_name }}</td>
+            <td>{{ row.facility_id }}</td>
+            <td>
+              <ul class="change-list">
+                {% for change in row.changes %}
+                  <li><strong>{{ change.label }}:</strong> {{ change.old if change.old is not none else "" }} &rarr; {{ change.new if change.new is not none else "" }}</li>
+                {% endfor %}
+              </ul>
+            </td>
+          </tr>
+        {% else %}
+          <tr><td colspan="4" class="empty">No changed reservations.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="panel">
+  <h2>Canceled Reservations</h2>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Reservation ID</th>
+          <th>Reservee name</th>
+          <th>Facility</th>
+          <th>Event date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in preview.preview.canceled_records %}
+          <tr>
+            <td>{{ row.reservation_id }}</td>
+            <td>{{ row.reservee_name }}</td>
+            <td>{{ row.facility_id }}</td>
+            <td>{{ row.event_date }}</td>
+          </tr>
+        {% else %}
+          <tr><td colspan="4" class="empty">No reservations will be marked canceled.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<form method="post" action="/import/apply/{{ preview.token }}" onsubmit="return confirm('Apply this import to live reservations?');">
+  {{ csrf_input(request) }}
+  <input type="hidden" name="confirm" value="yes">
+  <button type="submit" {% if preview.applied %}disabled{% endif %}>Apply reviewed import</button>
+</form>
+{% endblock %}

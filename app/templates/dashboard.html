@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="page-header">
+  <h1>Dashboard</h1>
+</section>
+
+<section class="metric-grid">
+  <a class="metric" href="/actions">
+    <span class="metric-number danger">{{ overdue_count }}</span>
+    <span class="metric-label">Overdue actions</span>
+  </a>
+  <a class="metric" href="/actions">
+    <span class="metric-number warning">{{ due_soon_count }}</span>
+    <span class="metric-label">Due soon actions</span>
+  </a>
+  <a class="metric" href="/calendar">
+    <span class="metric-number">{{ upcoming_count }}</span>
+    <span class="metric-label">Upcoming events, next 30 days</span>
+  </a>
+</section>
+
+<section class="dashboard-grid">
+  <div class="panel dashboard-panel dashboard-main-panel">
+    <div class="section-heading">
+      <h2>Needs Attention</h2>
+      <a href="/actions">View all</a>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Status</th>
+            <th>Due date</th>
+            <th>Reservation</th>
+            <th>Facility</th>
+            <th>Reservee name</th>
+            <th>Next action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in action_rows %}
+            <tr>
+              <td><span class="status {{ row.action.status|lower|replace(' ', '-') }}">{{ row.action.status }}</span></td>
+              <td>{{ row.action.due_date or "" }}</td>
+              <td><a href="/reservations/{{ row.reservation.reservation_id }}">{{ row.reservation.reservation_id }}</a></td>
+              <td>{{ row.reservation.facility.facility_name }}</td>
+              <td>{{ row.reservation.reservee_name }}</td>
+              <td>{{ row.action.next_action }}</td>
+            </tr>
+          {% else %}
+            <tr><td colspan="6" class="empty">No overdue or pending workflow actions.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <aside class="panel dashboard-panel">
+    <h2>Authorization Deadlines</h2>
+    <div class="compact-list">
+      {% for row in authorization_rows %}
+        <a class="compact-list-row" href="/reservations/{{ row.reservation.reservation_id }}">
+          <span>
+            <strong>{{ row.reservation.reservee_name }}</strong>
+            {{ row.reservation.facility.facility_name }}
+          </span>
+          <span>
+            <span class="status {{ row.action.status|lower|replace(' ', '-') }}">{{ row.action.status }}</span>
+            {{ row.action.due_date }}
+          </span>
+        </a>
+      {% else %}
+        <p class="empty compact-empty">No authorization emails waiting.</p>
+      {% endfor %}
+    </div>
+  </aside>
+</section>
+
+<section class="dashboard-grid">
+  <div class="panel dashboard-panel dashboard-main-panel">
+    <div class="section-heading">
+      <h2>Upcoming Events</h2>
+      <a href="/calendar">Open calendar</a>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Event date</th>
+            <th>Reservation</th>
+            <th>Facility</th>
+            <th>Reservee name</th>
+            <th>Authorization received</th>
+            <th>Approval sent</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for reservation in upcoming_events %}
+            <tr>
+              <td>{{ reservation.event_date }}</td>
+              <td><a href="/reservations/{{ reservation.reservation_id }}">{{ reservation.reservation_id }}</a></td>
+              <td>{{ reservation.facility.facility_name }}</td>
+              <td>{{ reservation.reservee_name }}</td>
+              <td>{{ reservation.auth_received_date or "No" }}</td>
+              <td>{{ reservation.approval_sent_date or "No" }}</td>
+            </tr>
+          {% else %}
+            <tr><td colspan="6" class="empty">No events in the next 14 days.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <aside class="panel dashboard-panel">
+    <h2>Problem Records</h2>
+    <div class="compact-list">
+      {% for row in problem_records %}
+        <a class="compact-list-row" href="/reservations/{{ row.reservation.reservation_id }}">
+          <span>
+            <strong>{{ row.reservation.reservee_name }}</strong>
+            {{ row.reservation.reservation_id }}
+          </span>
+          <span>{{ row.flags|join(", ") }}</span>
+        </a>
+      {% else %}
+        <p class="empty compact-empty">No missing contact or household fields found.</p>
+      {% endfor %}
+    </div>
+  </aside>
+</section>
+
+<section class="panel dashboard-panel">
+  <div class="section-heading">
+    <h2>Recent Import</h2>
+    <a href="/import">Import page</a>
+  </div>
+  {% if recent_import %}
+    <p>
+      {{ recent_import.imported_at|format_local_datetime }}:
+      {{ recent_import.filename }} added {{ recent_import.added_count }},
+      changed {{ recent_import.changed_count }},
+      canceled {{ recent_import.canceled_count }}.
+    </p>
+    {% if recent_import_changes %}
+      <div class="recent-import-list">
+        {% for row in recent_import_changes %}
+          <a href="/reservations/{{ row.reservation_id }}">
+            <span class="status">{{ row.label }}</span>
+            <strong>{{ row.reservation_id }}</strong>
+            <span>{{ row.reservee_name }}</span>
+            <span>{{ row.facility_id }}</span>
+          </a>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% else %}
+    <p>No imports have been applied yet.</p>
+  {% endif %}
+</section>
+{% endblock %}

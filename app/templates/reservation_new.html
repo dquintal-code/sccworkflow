@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="page-header">
+  <div>
+    <h1>New Reservation</h1>
+    <p>Create a reservation manually when it is not coming from an import.</p>
+  </div>
+  <a class="button-secondary" href="/reservations">Back to search</a>
+</section>
+
+<form class="detail-form" method="post" action="/reservations/new">
+  {{ csrf_input(request) }}
+  <section class="detail-grid">
+    <div class="panel">
+      <div class="section-heading">
+        <h2>Reservation Information</h2>
+        <label class="checkbox compact-checkbox">
+          <input type="checkbox" name="cancelled">
+          Canceled
+        </label>
+      </div>
+
+      <div class="form-grid">
+        <label>
+          Reservation ID
+          <input type="text" name="reservation_id" inputmode="numeric" pattern="[0-9]*" required>
+        </label>
+        <label>
+          Facility
+          <select name="facility_id" required>
+            <option value="">Select facility</option>
+            {% for facility in facilities %}
+              <option value="{{ facility.facility_id }}">{{ facility.facility_name }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <label>
+          Household number
+          <input type="text" name="household_number" inputmode="numeric" pattern="[0-9]*">
+        </label>
+        <label>
+          Booking date
+          <input type="date" name="booking_date">
+        </label>
+        <label>
+          Event date
+          <input type="date" name="event_date" required>
+        </label>
+        <label>
+          Event end date
+          <input type="date" name="event_end_date">
+        </label>
+      </div>
+    </div>
+
+    <div class="panel action-panel">
+      <h2>After Saving</h2>
+      <p class="sync-note">The reservation opens on its detail page. Documents, email drafts, and workflow dates can be managed there.</p>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Contact Information</h2>
+    <div class="form-grid contact-grid">
+      <label>
+        Reservee name
+        <input type="text" name="reservee_name" required>
+      </label>
+      <label>
+        Phone
+        <input type="tel" name="phone">
+      </label>
+      <label>
+        Email
+        <input type="email" name="email">
+      </label>
+    </div>
+  </section>
+
+  <section class="panel phone-workflow-panel">
+    <div class="section-heading">
+      <h2>Phone Reservation Workflow</h2>
+      <label class="toggle-switch">
+        <input id="phone-workflow-toggle" type="checkbox" name="use_phone_workflow">
+        <span class="toggle-slider" aria-hidden="true"></span>
+        <span class="toggle-label">Use phone reservation workflow</span>
+      </label>
+    </div>
+    <div id="phone-workflow-fields" class="form-grid phone-workflow-fields is-hidden">
+      <label>
+        Contract sent
+        <input type="date" name="contract_sent_date">
+      </label>
+      <label>
+        Contract due
+        <input type="date" name="contract_due_date">
+      </label>
+      <label>
+        Contract received
+        <input type="date" name="contract_received_date">
+      </label>
+      <label>
+        Payment received
+        <input type="date" name="payment_received_date">
+      </label>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Authorization And Follow-up</h2>
+    <div class="form-grid">
+      <label>
+        Authorization sent
+        <input type="date" name="auth_sent_date">
+      </label>
+      <label>
+        Authorization due
+        <input type="date" name="auth_due_date">
+      </label>
+      <label>
+        Authorization received
+        <input type="date" name="auth_received_date">
+      </label>
+      <label>
+        Reminder sent
+        <input type="date" name="auth_reminder_date">
+      </label>
+      <label>
+        Approval email sent
+        <input type="date" name="approval_sent_date">
+      </label>
+      <label>
+        Refund sent
+        <input type="date" name="refund_sent_date">
+      </label>
+      <label class="checkbox inline-checkbox">
+        <input type="checkbox" name="refund_completed">
+        Refund completed
+      </label>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Notes</h2>
+    <label>
+      Staff notes
+      <textarea name="notes" rows="5"></textarea>
+    </label>
+  </section>
+
+  <div class="sticky-actions">
+    <a class="button-secondary" href="/reservations">Cancel</a>
+    <button type="submit">Create reservation</button>
+  </div>
+</form>
+
+<script>
+  const phoneWorkflowToggle = document.getElementById("phone-workflow-toggle");
+  const phoneWorkflowFields = document.getElementById("phone-workflow-fields");
+
+  function syncPhoneWorkflowVisibility() {
+    phoneWorkflowFields.classList.toggle("is-hidden", !phoneWorkflowToggle.checked);
+  }
+
+  phoneWorkflowToggle.addEventListener("change", syncPhoneWorkflowVisibility);
+  syncPhoneWorkflowVisibility();
+</script>
+{% endblock %}

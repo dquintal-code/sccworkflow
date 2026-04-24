@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ app_name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/styles.css') }}">
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="/">
+        <img class="brand-logo" src="{{ url_for('static', path='/images/parks-logo.png') }}" alt="St. Charles County Parks">
+      </a>
+      <nav class="main-nav">
+        <a href="/">Home</a>
+        <a href="/reservations">Search</a>
+        <a href="/calendar">Event Calendar</a>
+        <a href="/actions">Action Queue</a>
+        <a href="/import">Import / Sync</a>
+      </nav>
+      <div class="topbar-meta">
+        <span>Recreation Specialist</span>
+        <strong>Workflow Tracker</strong>
+      </div>
+    </header>
+    <main class="page">
+      {% block content %}{% endblock %}
+    </main>
+  </body>
+</html>

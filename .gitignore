@@ -1,0 +1,13 @@
+.env
+.env.production
+.env.local
+.env.*.local
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.DS_Store
+postgres_data/
+storage/.DS_Store
+storage/reservation_documents/*
+!storage/reservation_documents/.gitkeep

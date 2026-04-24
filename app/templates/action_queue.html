@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="page-header">
+  <h1>Action Queue</h1>
+</section>
+
+<section class="panel">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Reservation ID</th>
+          <th>Facility</th>
+          <th>Reservee name</th>
+          <th>Event date</th>
+          <th>Next action</th>
+          <th>Due date</th>
+          <th>Days until due</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in rows %}
+          <tr>
+            <td><a href="/reservations/{{ row.reservation.reservation_id }}">{{ row.reservation.reservation_id }}</a></td>
+            <td>{{ row.reservation.facility.facility_name }}</td>
+            <td>{{ row.reservation.reservee_name }}</td>
+            <td>{{ row.reservation.event_date }}</td>
+            <td>{{ row.action.next_action }}</td>
+            <td>{{ row.action.due_date or "" }}</td>
+            <td>{{ row.action.days_until_due if row.action.days_until_due is not none else "" }}</td>
+            <td><span class="status {{ row.action.status|lower|replace(' ', '-') }}">{{ row.action.status }}</span></td>
+          </tr>
+        {% else %}
+          <tr><td colspan="8" class="empty">No open workflow actions.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

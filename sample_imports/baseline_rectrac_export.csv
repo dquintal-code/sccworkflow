@@ -1,0 +1,12 @@
+Reservation ID,Facility,Booking Type,Booking Date,Event Date,Event End Date,Household Number,Reservee Name,Phone,Email,Canceled
+600412,Brommelsiek Meeting Room,Online,2026-04-12,2026-05-03,,10482,Jenna Morales,555-0147,jenna.morales@example.com,FALSE
+600408,Brommelsiek Meeting Room,Online,2026-04-08,2026-05-03,,10391,Maya Chen,555-0128,maya.chen@example.com,FALSE
+600334,Quail Ridge Lodge,Phone,2026-03-29,2026-04-30,,9764,Robert Anders,555-0194,robert.anders@example.com,FALSE
+600328,Quail Ridge Lodge,Phone,2026-03-28,2026-04-26,,10018,Danielle Brooks,555-0162,danielle.brooks@example.com,FALSE
+600402,New Melle Landhaus,Online,2026-04-02,2026-05-01,2026-05-03,11820,Pine Ridge Youth Soccer,555-0188,scheduler@pineridgesoccer.example.com,FALSE
+600277,Heritage Meeting Room,Online,2026-03-20,2026-04-22,,9044,Northside Garden Club,555-0119,northsidegarden@example.com,FALSE
+600188,Brommelsiek Meeting Room,Phone,2026-02-28,2026-04-10,,8702,Thomas Riley,555-0173,thomas.riley@example.com,FALSE
+600220,Heritage Meeting Room,Online,2026-03-03,2026-05-08,,9351,Elena Watkins,555-0136,elena.watkins@example.com,TRUE
+600430,New Melle Landhaus,Online,2026-04-14,2026-05-10,,12105,Alicia Patel,555-0106,alicia.patel@example.com,FALSE
+600301,Quail Ridge Lodge,Phone,2026-03-24,2026-05-17,2026-05-18,9618,Eastview Neighborhood Association,555-0181,eastview.na@example.com,FALSE
+600441,Heritage Meeting Room,Online,2026-04-15,2026-06-05,,12344,Samantha Ortiz,555-0155,samantha.ortiz@example.com,FALSE

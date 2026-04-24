@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="page-header">
+  <h1>Import / Sync</h1>
+</section>
+
+{% if request.query_params.get("applied") %}
+  <div class="notice">Import applied and logged.</div>
+{% endif %}
+
+<section class="panel">
+  <h2>Upload RecTrac Export</h2>
+  <form class="upload-form" method="post" action="/import/preview" enctype="multipart/form-data">
+    {{ csrf_input(request) }}
+    <label>
+      CSV file
+      <input type="file" name="upload" accept=".csv,text/csv" required>
+    </label>
+    <button type="submit">Preview import</button>
+  </form>
+  <p class="muted">Supports RecTrac exports with Reservation Number, Facility Location, Begin Date, End Date, Household Number, Last Name, Primary First Name, phone, and email. Blank spacer rows are ignored.</p>
+</section>
+
+<section class="panel">
+  <h2>Recent Import Log</h2>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Import time</th>
+          <th>Filename</th>
+          <th>Added</th>
+          <th>Changed</th>
+          <th>Canceled</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for log in recent_imports %}
+          <tr>
+            <td>{{ log.imported_at|format_local_datetime }}</td>
+            <td>{{ log.filename }}</td>
+            <td>{{ log.added_count }}</td>
+            <td>{{ log.changed_count }}</td>
+            <td>{{ log.canceled_count }}</td>
+          </tr>
+        {% else %}
+          <tr><td colspan="5" class="empty">No applied imports yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

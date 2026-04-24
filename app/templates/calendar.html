@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="page-header">
+  <h1>Facility Calendar</h1>
+</section>
+
+<form class="filters" method="get" action="/calendar">
+  <label>
+    Facility
+    <select name="facility_id">
+      {% for facility in facilities %}
+        <option value="{{ facility.facility_id }}" {% if facility.facility_id == facility_id %}selected{% endif %}>{{ facility.facility_name }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <input type="hidden" name="year" value="{{ year }}">
+  <input type="hidden" name="month" value="{{ month }}">
+  <label class="checkbox">
+    <input type="checkbox" name="include_canceled" value="true" {% if include_canceled %}checked{% endif %}>
+    Include canceled
+  </label>
+  <button type="submit">Show calendar</button>
+</form>
+
+<section class="panel calendar-panel">
+  <div class="calendar-heading">
+    <a class="button-secondary" href="/calendar?facility_id={{ facility_id }}&year={{ prev_year }}&month={{ prev_month }}&include_canceled={{ 'true' if include_canceled else 'false' }}">Previous</a>
+    <h2>{{ month_name }}</h2>
+    <a class="button-secondary" href="/calendar?facility_id={{ facility_id }}&year={{ next_year }}&month={{ next_month }}&include_canceled={{ 'true' if include_canceled else 'false' }}">Next</a>
+  </div>
+
+  <div class="calendar-grid calendar-days">
+    <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+  </div>
+  <div class="calendar-grid">
+    {% for week in calendar_weeks %}
+      {% for cell in week %}
+        <div class="day-cell {% if not cell.in_month %}muted-cell{% endif %}">
+          <div class="day-number">{{ cell.date.day }}</div>
+          <div class="day-items">
+            {% for reservation in cell.reservations %}
+              <a class="calendar-item" href="/reservations/{{ reservation.reservation_id }}">
+                <span>{{ reservation.reservee_name }}</span>
+                <strong>{{ reservation.reservation_id }}</strong>
+              </a>
+            {% endfor %}
+          </div>
+        </div>
+      {% endfor %}
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

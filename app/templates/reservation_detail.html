@@ -1,0 +1,396 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="page-header">
+  <div>
+    <h1>Reservation {{ reservation.reservation_id }}</h1>
+    <p>{{ reservation.reservee_name }} at {{ reservation.facility.facility_name }}</p>
+  </div>
+  <a class="button-secondary" href="/reservations">Back to search</a>
+</section>
+
+{% if request.query_params.get("saved") %}
+  <div class="notice">Reservation saved.</div>
+{% endif %}
+{% if request.query_params.get("created") %}
+  <div class="notice">Reservation created.</div>
+{% endif %}
+{% if request.query_params.get("uploaded") %}
+  <div class="notice">Document uploaded.</div>
+{% endif %}
+{% if request.query_params.get("doc_deleted") %}
+  <div class="notice">Document deleted.</div>
+{% endif %}
+{% if request.query_params.get("marked") %}
+  <div class="notice">Workflow updated.</div>
+{% endif %}
+
+<nav class="reservation-tabs" aria-label="Reservation sections">
+  <button type="button" class="reservation-tab is-active" data-tab-target="details-panel">Details</button>
+  <button type="button" class="reservation-tab" data-tab-target="documents-panel">
+    Documents & Emails
+    {% if reservation.documents %}
+      <span>{{ reservation.documents|length }}</span>
+    {% endif %}
+  </button>
+</nav>
+
+<div id="details-panel" class="tab-panel">
+<form class="detail-form" method="post">
+  {{ csrf_input(request) }}
+  <section class="detail-grid">
+    <div class="panel">
+      <div class="section-heading">
+        <h2>Reservation Information</h2>
+        <label class="checkbox compact-checkbox">
+          <input type="checkbox" name="cancelled" {% if reservation.cancelled %}checked{% endif %}>
+          Canceled
+        </label>
+      </div>
+
+      <div class="form-grid">
+        <label>
+          Reservation ID
+          <input type="text" name="reservation_id" inputmode="numeric" pattern="[0-9]*" value="{{ reservation.reservation_id }}" required {% if reservation.documents %}readonly{% endif %}>
+        </label>
+        <label>
+          Facility
+          <select name="facility_id" required>
+            {% for facility in facilities %}
+              <option value="{{ facility.facility_id }}" {% if facility.facility_id == reservation.facility_id %}selected{% endif %}>{{ facility.facility_name }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <label>
+          Household number
+          <input type="text" name="household_number" inputmode="numeric" pattern="[0-9]*" value="{{ reservation.household_number or '' }}">
+        </label>
+        <label>
+          Booking date
+          <input type="date" name="booking_date" value="{{ reservation.booking_date or '' }}">
+        </label>
+        <label>
+          Event date
+          <input type="date" name="event_date" value="{{ reservation.event_date }}" required>
+        </label>
+        <label>
+          Event end date
+          <input type="date" name="event_end_date" value="{{ reservation.event_end_date or '' }}">
+        </label>
+      </div>
+      {% if reservation.documents %}
+        <p class="sync-note">Reservation ID is locked once documents have been uploaded.</p>
+      {% endif %}
+    </div>
+
+    <div class="panel action-panel">
+      <h2>Current Action</h2>
+      <dl class="field-list compact-field-list">
+        <dt>Next action</dt><dd>{{ action.next_action }}</dd>
+        <dt>Due date</dt><dd>{{ action.due_date or "" }}</dd>
+        <dt>Days until due</dt><dd>{{ action.days_until_due if action.days_until_due is not none else "" }}</dd>
+        <dt>Status</dt><dd><span class="status {{ action.status|lower|replace(' ', '-') }}">{{ action.status }}</span></dd>
+      </dl>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Contact Information</h2>
+    <div class="form-grid contact-grid">
+      <label>
+        Reservee name
+        <input type="text" name="reservee_name" value="{{ reservation.reservee_name }}" required>
+      </label>
+      <label>
+        Phone
+        <input type="tel" name="phone" value="{{ reservation.phone or '' }}">
+      </label>
+      <label>
+        Email
+        <input type="email" name="email" value="{{ reservation.email or '' }}">
+      </label>
+    </div>
+  </section>
+
+  <section class="panel phone-workflow-panel">
+    <div class="section-heading">
+      <h2>Phone Reservation Workflow</h2>
+      <label class="toggle-switch">
+        <input id="phone-workflow-toggle" type="checkbox" name="use_phone_workflow" {% if reservation.booking_type == "Phone" %}checked{% endif %}>
+        <span class="toggle-slider" aria-hidden="true"></span>
+        <span class="toggle-label">Use phone reservation workflow</span>
+      </label>
+    </div>
+    <div id="phone-workflow-fields" class="form-grid phone-workflow-fields {% if reservation.booking_type != 'Phone' %}is-hidden{% endif %}">
+      <label>
+        Contract sent
+        <input type="date" name="contract_sent_date" value="{{ reservation.contract_sent_date or '' }}">
+      </label>
+      <label>
+        Contract due
+        <input type="date" name="contract_due_date" value="{{ reservation.contract_due_date or '' }}">
+      </label>
+      <label>
+        Contract received
+        <input type="date" name="contract_received_date" value="{{ reservation.contract_received_date or '' }}">
+      </label>
+      <label>
+        Payment received
+        <input type="date" name="payment_received_date" value="{{ reservation.payment_received_date or '' }}">
+      </label>
+      <div class="workflow-quick-actions">
+        <button type="submit" class="button-secondary" formmethod="post" formnovalidate formaction="/reservations/{{ reservation.reservation_id }}/workflow/contract-sent-today">Contract sent today</button>
+        <button type="submit" class="button-secondary" formmethod="post" formnovalidate formaction="/reservations/{{ reservation.reservation_id }}/workflow/contract-received-today">Contract received today</button>
+        <button type="submit" class="button-secondary" formmethod="post" formnovalidate formaction="/reservations/{{ reservation.reservation_id }}/workflow/payment-received-today">Payment received today</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Authorization And Follow-up</h2>
+    <div class="form-grid">
+      <label>
+        Authorization sent
+        <input type="date" name="auth_sent_date" value="{{ reservation.auth_sent_date or '' }}">
+      </label>
+      <label>
+        Authorization due
+        <input type="date" name="auth_due_date" value="{{ reservation.auth_due_date or '' }}">
+      </label>
+      <label>
+        Authorization received
+        <input type="date" name="auth_received_date" value="{{ reservation.auth_received_date or '' }}">
+      </label>
+      <label>
+        Reminder sent
+        <input type="date" name="auth_reminder_date" value="{{ reservation.auth_reminder_date or '' }}">
+      </label>
+      <label>
+        Approval email sent
+        <input type="date" name="approval_sent_date" value="{{ reservation.approval_sent_date or '' }}">
+      </label>
+      <label>
+        Refund sent
+        <input type="date" name="refund_sent_date" value="{{ reservation.refund_sent_date or '' }}">
+      </label>
+      <label class="checkbox inline-checkbox">
+        <input type="checkbox" name="refund_completed" {% if reservation.refund_completed %}checked{% endif %}>
+        Refund completed
+      </label>
+    </div>
+    <div class="workflow-quick-actions">
+      <button type="submit" class="button-secondary" formmethod="post" formnovalidate formaction="/reservations/{{ reservation.reservation_id }}/workflow/authorization-received-today">Authorization received today</button>
+      <button type="submit" class="button-secondary" formmethod="post" formnovalidate formaction="/reservations/{{ reservation.reservation_id }}/workflow/refund-completed-today">Refund completed today</button>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Notes</h2>
+    <label>
+      Staff notes
+      <textarea name="notes" rows="5">{{ reservation.notes or "" }}</textarea>
+    </label>
+    <p class="sync-note">Last import action: {{ reservation.last_sync_action or "None" }}</p>
+  </section>
+
+  <div class="sticky-actions">
+    <button
+      type="submit"
+      class="delete-button"
+      formaction="/reservations/{{ reservation.reservation_id }}/delete"
+      formmethod="post"
+      onclick="return confirm('Delete reservation {{ reservation.reservation_id }}? This cannot be undone.');"
+    >
+      Delete reservation
+    </button>
+    <button type="submit">Save reservation</button>
+  </div>
+</form>
+</div>
+
+<section id="documents-panel" class="tab-panel is-hidden">
+<div id="documents-emails" class="panel">
+  <h2>Documents & Emails</h2>
+
+  <div class="email-actions">
+    <form method="post" action="/reservations/{{ reservation.reservation_id }}/emails/authorization">
+      {{ csrf_input(request) }}
+      <h3>Authorization Email</h3>
+      <p class="email-status">
+        {% if reservation.auth_sent_date %}
+          Sent {{ reservation.auth_sent_date }}
+        {% else %}
+          Not marked sent
+        {% endif %}
+      </p>
+      <button type="submit">Download email draft</button>
+      <button
+        type="submit"
+        class="button-secondary"
+        formaction="/reservations/{{ reservation.reservation_id }}/emails/authorization/mark-sent"
+        onclick="return confirm('Mark authorization email sent today?');"
+      >
+        Mark sent today
+      </button>
+    </form>
+
+    <form method="post" action="/reservations/{{ reservation.reservation_id }}/emails/reminder">
+      {{ csrf_input(request) }}
+      <h3>Reminder Email</h3>
+      <p class="email-status">
+        {% if reservation.auth_reminder_date %}
+          Sent {{ reservation.auth_reminder_date }}
+        {% else %}
+          Not marked sent
+        {% endif %}
+      </p>
+      <button type="submit">Download email draft</button>
+      <button
+        type="submit"
+        class="button-secondary"
+        formaction="/reservations/{{ reservation.reservation_id }}/emails/reminder/mark-sent"
+        onclick="return confirm('Mark reminder email sent today?');"
+      >
+        Mark sent today
+      </button>
+    </form>
+
+    <form method="post" action="/reservations/{{ reservation.reservation_id }}/emails/approval">
+      {{ csrf_input(request) }}
+      <h3>Approval Email</h3>
+      <p class="email-status">
+        {% if reservation.approval_sent_date %}
+          Sent {{ reservation.approval_sent_date }}
+        {% else %}
+          Not marked sent
+        {% endif %}
+      </p>
+      <label>
+        Check-in time
+        <input type="text" name="check_in_time" placeholder="Example: 10:00 am" required>
+      </label>
+      <label>
+        Approved form to attach
+        <select name="document_id" required>
+          <option value="">{% if approved_documents %}Select approved authorization form{% else %}No approved authorization form uploaded{% endif %}</option>
+          {% for document in approved_documents %}
+            <option value="{{ document.id }}">{{ document.document_type }} - {{ document.original_filename }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <button type="submit">Download email draft</button>
+      <button
+        type="submit"
+        class="button-secondary"
+        formaction="/reservations/{{ reservation.reservation_id }}/emails/approval/mark-sent"
+        formnovalidate
+        onclick="return confirm('Mark approval email sent today?');"
+      >
+        Mark sent today
+      </button>
+    </form>
+  </div>
+
+  <div class="document-upload">
+    <h3>Upload Document</h3>
+    <form method="post" action="/reservations/{{ reservation.reservation_id }}/documents" enctype="multipart/form-data">
+      {{ csrf_input(request) }}
+      <label>
+        Document type
+        <select name="document_type" required>
+          <option value="Returned authorization form">Returned authorization form</option>
+          <option value="Approved authorization form">Approved authorization form</option>
+          <option value="Signed contract">Signed contract</option>
+          <option value="Payment receipt">Payment receipt</option>
+          <option value="Insurance certificate">Insurance certificate</option>
+          <option value="Other">Other</option>
+        </select>
+      </label>
+      <label>
+        File
+        <input type="file" name="upload" required>
+      </label>
+      <button type="submit">Upload document</button>
+    </form>
+  </div>
+
+  <div class="document-list">
+    <h3>Uploaded Documents</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Filename</th>
+            <th>Uploaded</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for document in reservation.documents|sort(attribute="uploaded_at", reverse=true) %}
+            <tr>
+              <td>{{ document.document_type }}</td>
+              <td><a href="/reservations/{{ reservation.reservation_id }}/documents/{{ document.id }}">{{ document.original_filename }}</a></td>
+              <td>{{ document.uploaded_at|format_local_datetime }}</td>
+              <td>
+                <form method="post" action="/reservations/{{ reservation.reservation_id }}/documents/{{ document.id }}/delete" onsubmit="return confirm('Delete this uploaded document?');">
+                  {{ csrf_input(request) }}
+                  <button type="submit" class="button-secondary">Delete</button>
+                </form>
+              </td>
+            </tr>
+          {% else %}
+            <tr><td colspan="4" class="empty">No documents uploaded yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+</section>
+
+<script>
+  const phoneWorkflowToggle = document.getElementById("phone-workflow-toggle");
+  const phoneWorkflowFields = document.getElementById("phone-workflow-fields");
+  const reservationTabs = document.querySelectorAll(".reservation-tab");
+  const tabPanels = document.querySelectorAll(".tab-panel");
+
+  function syncPhoneWorkflowVisibility() {
+    phoneWorkflowFields.classList.toggle("is-hidden", !phoneWorkflowToggle.checked);
+  }
+
+  function showReservationTab(panelId) {
+    tabPanels.forEach((panel) => {
+      panel.classList.toggle("is-hidden", panel.id !== panelId);
+    });
+    reservationTabs.forEach((tab) => {
+      const isActive = tab.dataset.tabTarget === panelId;
+      tab.classList.toggle("is-active", isActive);
+      tab.setAttribute("aria-selected", isActive ? "true" : "false");
+    });
+  }
+
+  reservationTabs.forEach((tab) => {
+    tab.addEventListener("click", () => {
+      showReservationTab(tab.dataset.tabTarget);
+      if (tab.dataset.tabTarget === "documents-panel") {
+        history.replaceState(null, "", "#documents-emails");
+      } else {
+        history.replaceState(null, "", window.location.pathname + window.location.search);
+      }
+    });
+  });
+
+  if (phoneWorkflowToggle && phoneWorkflowFields) {
+    phoneWorkflowToggle.addEventListener("change", syncPhoneWorkflowVisibility);
+    syncPhoneWorkflowVisibility();
+  }
+
+  const queryParams = new URLSearchParams(window.location.search);
+  if (window.location.hash === "#documents-emails" || queryParams.has("uploaded") || queryParams.has("doc_deleted") || queryParams.has("marked")) {
+    showReservationTab("documents-panel");
+  } else {
+    showReservationTab("details-panel");
+  }
+</script>
+{% endblock %}
