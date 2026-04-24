@@ -7,16 +7,25 @@
 
 <section class="metric-grid">
   <a class="metric" href="/actions">
-    <span class="metric-number danger">{{ overdue_count }}</span>
-    <span class="metric-label">Overdue actions</span>
+    <span class="metric-icon metric-icon-danger"><svg><use href="#icon-alert"></use></svg></span>
+    <span>
+      <span class="metric-number danger">{{ overdue_count }}</span>
+      <span class="metric-label">Overdue actions</span>
+    </span>
   </a>
   <a class="metric" href="/actions">
-    <span class="metric-number warning">{{ due_soon_count }}</span>
-    <span class="metric-label">Due soon actions</span>
+    <span class="metric-icon metric-icon-warning"><svg><use href="#icon-clock"></use></svg></span>
+    <span>
+      <span class="metric-number warning">{{ due_soon_count }}</span>
+      <span class="metric-label">Due soon actions</span>
+    </span>
   </a>
   <a class="metric" href="/calendar">
-    <span class="metric-number">{{ upcoming_count }}</span>
-    <span class="metric-label">Upcoming events, next 30 days</span>
+    <span class="metric-icon metric-icon-success"><svg><use href="#icon-calendar"></use></svg></span>
+    <span>
+      <span class="metric-number">{{ upcoming_count }}</span>
+      <span class="metric-label">Upcoming events, next 30 days</span>
+    </span>
   </a>
 </section>
 
@@ -27,7 +36,7 @@
       <a href="/actions">View all</a>
     </div>
     <div class="table-wrap">
-      <table>
+      <table class="workflow-table">
         <thead>
           <tr>
             <th>Status</th>
@@ -84,7 +93,7 @@
       <a href="/calendar">Open calendar</a>
     </div>
     <div class="table-wrap">
-      <table>
+      <table class="events-table">
         <thead>
           <tr>
             <th>Event date</th>

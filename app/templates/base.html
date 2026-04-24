@@ -4,19 +4,57 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ app_name }}</title>
-    <link rel="stylesheet" href="{{ url_for('static', path='/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='/styles.css') }}?v=visual-refresh-20260424e">
   </head>
   <body>
+    <svg class="icon-sprite" aria-hidden="true" focusable="false">
+      <symbol id="icon-home" viewBox="0 0 24 24">
+        <path d="M3 10.8 12 3l9 7.8"></path>
+        <path d="M5 9.8V21h5v-6h4v6h5V9.8"></path>
+      </symbol>
+      <symbol id="icon-search" viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="7"></circle>
+        <path d="m16.5 16.5 4.5 4.5"></path>
+      </symbol>
+      <symbol id="icon-calendar" viewBox="0 0 24 24">
+        <path d="M7 3v4"></path>
+        <path d="M17 3v4"></path>
+        <rect x="4" y="5" width="16" height="16" rx="2"></rect>
+        <path d="M4 10h16"></path>
+      </symbol>
+      <symbol id="icon-list-check" viewBox="0 0 24 24">
+        <path d="M9 6h11"></path>
+        <path d="M9 12h11"></path>
+        <path d="M9 18h11"></path>
+        <path d="m3.5 6 1 1 2-2"></path>
+        <path d="m3.5 12 1 1 2-2"></path>
+        <path d="m3.5 18 1 1 2-2"></path>
+      </symbol>
+      <symbol id="icon-upload" viewBox="0 0 24 24">
+        <path d="M12 3v12"></path>
+        <path d="m7 8 5-5 5 5"></path>
+        <path d="M5 15v4h14v-4"></path>
+      </symbol>
+      <symbol id="icon-alert" viewBox="0 0 24 24">
+        <path d="M12 4 3 20h18L12 4Z"></path>
+        <path d="M12 9v5"></path>
+        <path d="M12 17h.01"></path>
+      </symbol>
+      <symbol id="icon-clock" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="9"></circle>
+        <path d="M12 7v5l3 2"></path>
+      </symbol>
+    </svg>
     <header class="topbar">
       <a class="brand" href="/">
         <img class="brand-logo" src="{{ url_for('static', path='/images/parks-logo.png') }}" alt="St. Charles County Parks">
       </a>
       <nav class="main-nav">
-        <a href="/">Home</a>
-        <a href="/reservations">Search</a>
-        <a href="/calendar">Event Calendar</a>
-        <a href="/actions">Action Queue</a>
-        <a href="/import">Import / Sync</a>
+        <a href="/"><svg class="nav-icon"><use href="#icon-home"></use></svg>Home</a>
+        <a href="/reservations"><svg class="nav-icon"><use href="#icon-search"></use></svg>Search</a>
+        <a href="/calendar"><svg class="nav-icon"><use href="#icon-calendar"></use></svg>Event Calendar</a>
+        <a href="/actions"><svg class="nav-icon"><use href="#icon-list-check"></use></svg>Action Queue</a>
+        <a href="/import"><svg class="nav-icon"><use href="#icon-upload"></use></svg>Import / Sync</a>
       </nav>
       <div class="topbar-meta">
         <span>Recreation Specialist</span>

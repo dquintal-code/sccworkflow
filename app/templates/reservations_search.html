@@ -13,7 +13,7 @@
 
 <div class="search-layout">
   <form class="filter-sidebar" method="get" action="/reservations">
-    <div class="filter-card open">
+    <div class="filter-card filter-card-search open">
       <h2>Search</h2>
       <label>
         Keyword
@@ -21,7 +21,7 @@
       </label>
     </div>
 
-    <div class="filter-card open">
+    <div class="filter-card filter-card-facility open">
       <h2>Facility</h2>
       <label>
         Facility
@@ -34,7 +34,7 @@
       </label>
     </div>
 
-    <div class="filter-card open">
+    <div class="filter-card filter-card-date open">
       <h2>Reservation Date</h2>
       <label>
         Date
@@ -42,7 +42,7 @@
       </label>
     </div>
 
-    <div class="filter-card open">
+    <div class="filter-card filter-card-status open">
       <h2>Status</h2>
       <label class="checkbox">
         <input type="checkbox" name="include_canceled" value="true" {% if include_canceled %}checked{% endif %}>
@@ -66,7 +66,7 @@
       </div>
       <div class="display-option">Display option: <strong>Detail</strong></div>
       <div class="table-wrap">
-        <table>
+        <table class="search-results-table">
           <thead>
             <tr>
               <th>{{ sort_link("Reservation ID", "reservation_id") }}</th>
